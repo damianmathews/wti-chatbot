@@ -225,20 +225,6 @@
 #chatkit-input-wrapper:focus-within {
     border-color: rgba(255, 255, 255, 0.3);
 }
-#chatkit-input-wrapper button.attach {
-    background: none;
-    border: none;
-    cursor: pointer;
-    padding: 4px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-#chatkit-input-wrapper button.attach svg {
-    width: 20px;
-    height: 20px;
-    fill: rgba(255, 255, 255, 0.5);
-}
 #chatkit-input {
     flex: 1;
     background: none;
@@ -261,14 +247,11 @@
     align-items: center;
     justify-content: center;
     transition: transform 0.2s;
+    color: #133672;
+    font-size: 18px;
 }
 #chatkit-send:hover {
     transform: scale(1.05);
-}
-#chatkit-send svg {
-    width: 18px;
-    height: 18px;
-    fill: #133672;
 }
 
 /* Mobile Responsive */
@@ -327,13 +310,8 @@
     </div>
     <div id="chatkit-input-area">
         <div id="chatkit-input-wrapper">
-            <button class="attach" aria-label="Attach file">
-                <svg viewBox="0 0 24 24"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
-            </button>
             <input type="text" id="chatkit-input" placeholder="Ask anything..." />
-            <button id="chatkit-send" aria-label="Send message">
-                <svg viewBox="0 0 24 24"><path fill="#133672" d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
-            </button>
+            <button id="chatkit-send" aria-label="Send message">➤</button>
         </div>
     </div>
 </div>
