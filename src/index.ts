@@ -302,6 +302,8 @@ export const runWorkflow = async (workflow: WorkflowInput) => {
     };
     const classifyCategory = classifyResult.output_parsed.category;
     const classifyOutput = {"category": classifyCategory};
+    let outputText = "";
+
     if (classifyCategory == "SERVICES") {
       const servicesResultTemp = await runner.run(
         services,
@@ -309,15 +311,10 @@ export const runWorkflow = async (workflow: WorkflowInput) => {
           ...conversationHistory
         ]
       );
-      conversationHistory.push(...servicesResultTemp.newItems.map((item) => item.rawItem));
-
       if (!servicesResultTemp.finalOutput) {
           throw new Error("Agent result is undefined");
       }
-
-      const servicesResult = {
-        output_text: servicesResultTemp.finalOutput ?? ""
-      };
+      outputText = servicesResultTemp.finalOutput ?? "";
     } else if (classifyCategory == "CX_MODERNIZATION") {
       const cxModResultTemp = await runner.run(
         cxMod,
@@ -325,15 +322,10 @@ export const runWorkflow = async (workflow: WorkflowInput) => {
           ...conversationHistory
         ]
       );
-      conversationHistory.push(...cxModResultTemp.newItems.map((item) => item.rawItem));
-
       if (!cxModResultTemp.finalOutput) {
           throw new Error("Agent result is undefined");
       }
-
-      const cxModResult = {
-        output_text: cxModResultTemp.finalOutput ?? ""
-      };
+      outputText = cxModResultTemp.finalOutput ?? "";
     } else if (classifyCategory == "INNOVATIVE_IT") {
       const itResultTemp = await runner.run(
         innovativeIt,
@@ -341,15 +333,10 @@ export const runWorkflow = async (workflow: WorkflowInput) => {
           ...conversationHistory
         ]
       );
-      conversationHistory.push(...itResultTemp.newItems.map((item) => item.rawItem));
-
       if (!itResultTemp.finalOutput) {
           throw new Error("Agent result is undefined");
       }
-
-      const itResult = {
-        output_text: itResultTemp.finalOutput ?? ""
-      };
+      outputText = itResultTemp.finalOutput ?? "";
     } else if (classifyCategory == "APPLIED_AI") {
       const appliedAiResultTemp = await runner.run(
         appliedAi,
@@ -357,15 +344,10 @@ export const runWorkflow = async (workflow: WorkflowInput) => {
           ...conversationHistory
         ]
       );
-      conversationHistory.push(...appliedAiResultTemp.newItems.map((item) => item.rawItem));
-
       if (!appliedAiResultTemp.finalOutput) {
           throw new Error("Agent result is undefined");
       }
-
-      const appliedAiResult = {
-        output_text: appliedAiResultTemp.finalOutput ?? ""
-      };
+      outputText = appliedAiResultTemp.finalOutput ?? "";
     } else if (classifyCategory == "CONTENT") {
       const contentResultTemp = await runner.run(
         content,
@@ -373,15 +355,10 @@ export const runWorkflow = async (workflow: WorkflowInput) => {
           ...conversationHistory
         ]
       );
-      conversationHistory.push(...contentResultTemp.newItems.map((item) => item.rawItem));
-
       if (!contentResultTemp.finalOutput) {
           throw new Error("Agent result is undefined");
       }
-
-      const contentResult = {
-        output_text: contentResultTemp.finalOutput ?? ""
-      };
+      outputText = contentResultTemp.finalOutput ?? "";
     } else if (classifyCategory == "SUPPORT") {
       const supportResultTemp = await runner.run(
         support,
@@ -389,15 +366,10 @@ export const runWorkflow = async (workflow: WorkflowInput) => {
           ...conversationHistory
         ]
       );
-      conversationHistory.push(...supportResultTemp.newItems.map((item) => item.rawItem));
-
       if (!supportResultTemp.finalOutput) {
           throw new Error("Agent result is undefined");
       }
-
-      const supportResult = {
-        output_text: supportResultTemp.finalOutput ?? ""
-      };
+      outputText = supportResultTemp.finalOutput ?? "";
     } else {
       const salesResultTemp = await runner.run(
         sales,
@@ -405,15 +377,12 @@ export const runWorkflow = async (workflow: WorkflowInput) => {
           ...conversationHistory
         ]
       );
-      conversationHistory.push(...salesResultTemp.newItems.map((item) => item.rawItem));
-
       if (!salesResultTemp.finalOutput) {
           throw new Error("Agent result is undefined");
       }
-
-      const salesResult = {
-        output_text: salesResultTemp.finalOutput ?? ""
-      };
+      outputText = salesResultTemp.finalOutput ?? "";
     }
+
+    return outputText;
   });
 }
