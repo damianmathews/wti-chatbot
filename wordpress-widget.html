@@ -133,30 +133,6 @@
     background: #4ade80;
     border-radius: 50%;
 }
-#chatkit-header-actions {
-    display: flex;
-    gap: 8px;
-}
-#chatkit-header-actions button {
-    background: rgba(255, 255, 255, 0.1);
-    border: none;
-    width: 36px;
-    height: 36px;
-    border-radius: 8px;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: background 0.2s;
-}
-#chatkit-header-actions button:hover {
-    background: rgba(255, 255, 255, 0.2);
-}
-#chatkit-header-actions button svg {
-    width: 18px;
-    height: 18px;
-    fill: white;
-}
 
 /* Messages Area */
 #chatkit-messages {
@@ -339,11 +315,6 @@
                 <div id="chatkit-header-status">Online</div>
             </div>
         </div>
-        <div id="chatkit-header-actions">
-            <button id="chatkit-history" aria-label="Chat history">
-                <svg viewBox="0 0 24 24"><path d="M13 3c-4.97 0-9 4.03-9 9H1l3.89 3.89.07.14L9 12H6c0-3.87 3.13-7 7-7s7 3.13 7 7-3.13 7-7 7c-1.93 0-3.68-.79-4.94-2.06l-1.42 1.42C8.27 19.99 10.51 21 13 21c4.97 0 9-4.03 9-9s-4.03-9-9-9zm-1 5v5l4.28 2.54.72-1.21-3.5-2.08V8H12z"/></svg>
-            </button>
-        </div>
     </div>
     <div id="chatkit-messages">
         <div id="chatkit-welcome">
@@ -361,7 +332,7 @@
             </button>
             <input type="text" id="chatkit-input" placeholder="Ask anything..." />
             <button id="chatkit-send" aria-label="Send message">
-                <svg viewBox="0 0 24 24"><path d="M4 12l1.41 1.41L11 7.83V20h2V7.83l5.58 5.59L20 12l-8-8-8 8z"/></svg>
+                <svg viewBox="0 0 24 24" fill="#133672"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
             </button>
         </div>
     </div>
