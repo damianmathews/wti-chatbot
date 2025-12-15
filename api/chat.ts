@@ -1,5 +1,5 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { runWorkflow } from '../src/index.js';
+import { runWorkflow } from '../src/index';
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   // CORS headers
