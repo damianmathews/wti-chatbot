@@ -400,8 +400,10 @@
 
     chatButton.addEventListener('click', toggleChat);
 
+    const API_URL = 'https://website-chatkit-aa96p9yli-damianmathews-1710s-projects.vercel.app/';
+
     // Send message function
-    function sendMessage(text) {
+    async function sendMessage(text) {
         if (!text.trim()) return;
 
         // Hide welcome section
@@ -421,15 +423,52 @@
         // Scroll to bottom
         messagesContainer.scrollTop = messagesContainer.scrollHeight;
 
-        // TODO: Connect to your OpenAI agent backend here
-        // For now, show a placeholder response
-        setTimeout(function() {
+        // Show typing indicator
+        const typingMsg = document.createElement('div');
+        typingMsg.className = 'chatkit-message assistant';
+        typingMsg.id = 'chatkit-typing';
+        typingMsg.textContent = 'Thinking...';
+        messagesContainer.appendChild(typingMsg);
+        messagesContainer.scrollTop = messagesContainer.scrollHeight;
+
+        try {
+            const response = await fetch(API_URL, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ input_as_text: text })
+            });
+
+            // Remove typing indicator
+            const typing = document.getElementById('chatkit-typing');
+            if (typing) typing.remove();
+
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+
+            const data = await response.json();
+
+            // Add bot response
             const botMsg = document.createElement('div');
             botMsg.className = 'chatkit-message assistant';
-            botMsg.textContent = "I'm an AI assistant for Waterfield Tech. One moment while I process your request...";
+            botMsg.textContent = data.output_text || data.response || data.message || "I'm sorry, I couldn't process that request.";
             messagesContainer.appendChild(botMsg);
             messagesContainer.scrollTop = messagesContainer.scrollHeight;
-        }, 500);
+
+        } catch (error) {
+            console.error('Chat error:', error);
+            // Remove typing indicator
+            const typing = document.getElementById('chatkit-typing');
+            if (typing) typing.remove();
+
+            const errorMsg = document.createElement('div');
+            errorMsg.className = 'chatkit-message assistant';
+            errorMsg.textContent = "Sorry, I'm having trouble connecting. Please try again.";
+            messagesContainer.appendChild(errorMsg);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
     }
 
     // Send on button click
