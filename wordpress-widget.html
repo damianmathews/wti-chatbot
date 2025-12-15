@@ -1,0 +1,479 @@
+<style>
+/* Chat Button - Rounded Rectangle */
+#chatkit-button {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    width: 70px;
+    height: 70px;
+    border-radius: 16px;
+    background: #133672;
+    box-shadow: 0 4px 16px rgba(19, 54, 114, 0.4), 0 2px 8px rgba(0, 0, 0, 0.1);
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 999998;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+#chatkit-button:hover {
+    transform: scale(1.08);
+    box-shadow: 0 6px 24px rgba(19, 54, 114, 0.5), 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+#chatkit-button:active {
+    transform: scale(0.95);
+}
+#chatkit-button svg {
+    width: 32px;
+    height: 32px;
+    fill: white;
+    transition: transform 0.3s ease;
+}
+#chatkit-button.open svg.chat-icon {
+    display: none;
+}
+#chatkit-button.open svg.close-icon {
+    display: block;
+}
+#chatkit-button svg.close-icon {
+    display: none;
+}
+
+/* Popup bubble */
+#chatkit-popup {
+    position: fixed;
+    bottom: 104px;
+    right: 24px;
+    background: white;
+    padding: 12px 18px;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+    z-index: 999997;
+    opacity: 0;
+    transform: translateY(10px);
+    transition: all 0.3s ease;
+    pointer-events: none;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-size: 14px;
+    color: #333;
+    max-width: 200px;
+}
+#chatkit-popup.show {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+}
+#chatkit-popup::after {
+    content: '';
+    position: absolute;
+    bottom: -8px;
+    right: 30px;
+    width: 0;
+    height: 0;
+    border-left: 8px solid transparent;
+    border-right: 8px solid transparent;
+    border-top: 8px solid white;
+}
+#chatkit-popup-close {
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    width: 20px;
+    height: 20px;
+    background: #133672;
+    border-radius: 50%;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    color: white;
+    line-height: 1;
+}
+
+/* Chat Window */
+#chatkit-window {
+    position: fixed;
+    bottom: 104px;
+    right: 24px;
+    width: 400px;
+    height: 600px;
+    max-height: calc(100vh - 140px);
+    background: #0a1628;
+    border-radius: 16px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    z-index: 999999;
+    display: none;
+    flex-direction: column;
+    overflow: hidden;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+#chatkit-window.open {
+    display: flex;
+}
+
+/* Header */
+#chatkit-header {
+    background: linear-gradient(135deg, #133672 0%, #1a4a9e 100%);
+    padding: 16px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+#chatkit-header-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+#chatkit-header-title {
+    color: white;
+    font-size: 18px;
+    font-weight: 600;
+}
+#chatkit-header-status {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 13px;
+}
+#chatkit-header-status::before {
+    content: '';
+    width: 8px;
+    height: 8px;
+    background: #4ade80;
+    border-radius: 50%;
+}
+#chatkit-header-actions {
+    display: flex;
+    gap: 8px;
+}
+#chatkit-header-actions button {
+    background: rgba(255, 255, 255, 0.1);
+    border: none;
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s;
+}
+#chatkit-header-actions button:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+#chatkit-header-actions button svg {
+    width: 18px;
+    height: 18px;
+    fill: white;
+}
+
+/* Messages Area */
+#chatkit-messages {
+    flex: 1;
+    overflow-y: auto;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+/* Welcome Message */
+#chatkit-welcome {
+    text-align: center;
+    padding: 40px 20px;
+}
+#chatkit-welcome h2 {
+    color: white;
+    font-size: 24px;
+    font-weight: 600;
+    margin: 0 0 20px 0;
+}
+#chatkit-welcome-suggestion {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: rgba(255, 255, 255, 0.05);
+    padding: 12px 16px;
+    border-radius: 10px;
+    color: rgba(255, 255, 255, 0.7);
+    cursor: pointer;
+    transition: background 0.2s;
+    margin: 0 auto;
+    max-width: 250px;
+}
+#chatkit-welcome-suggestion:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+#chatkit-welcome-suggestion svg {
+    width: 20px;
+    height: 20px;
+    fill: rgba(255, 255, 255, 0.5);
+}
+
+/* Message Bubbles */
+.chatkit-message {
+    max-width: 85%;
+    padding: 12px 16px;
+    border-radius: 12px;
+    font-size: 14px;
+    line-height: 1.5;
+}
+.chatkit-message.user {
+    background: #133672;
+    color: white;
+    align-self: flex-end;
+    border-bottom-right-radius: 4px;
+}
+.chatkit-message.assistant {
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+    align-self: flex-start;
+    border-bottom-left-radius: 4px;
+}
+
+/* Input Area */
+#chatkit-input-area {
+    padding: 16px 20px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+#chatkit-input-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 12px;
+    padding: 8px 12px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    transition: border-color 0.2s;
+}
+#chatkit-input-wrapper:focus-within {
+    border-color: rgba(255, 255, 255, 0.3);
+}
+#chatkit-input-wrapper button.attach {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+#chatkit-input-wrapper button.attach svg {
+    width: 20px;
+    height: 20px;
+    fill: rgba(255, 255, 255, 0.5);
+}
+#chatkit-input {
+    flex: 1;
+    background: none;
+    border: none;
+    color: white;
+    font-size: 14px;
+    outline: none;
+}
+#chatkit-input::placeholder {
+    color: rgba(255, 255, 255, 0.4);
+}
+#chatkit-send {
+    background: white;
+    border: none;
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.2s;
+}
+#chatkit-send:hover {
+    transform: scale(1.05);
+}
+#chatkit-send svg {
+    width: 18px;
+    height: 18px;
+    fill: #133672;
+}
+
+/* Mobile Responsive */
+@media (max-width: 480px) {
+    #chatkit-window {
+        width: calc(100vw - 20px);
+        height: calc(100vh - 100px);
+        right: 10px;
+        bottom: 94px;
+        border-radius: 12px;
+    }
+    #chatkit-button {
+        right: 16px;
+        bottom: 16px;
+        width: 60px;
+        height: 60px;
+    }
+    #chatkit-popup {
+        right: 16px;
+        bottom: 86px;
+    }
+}
+</style>
+
+<!-- Popup Bubble -->
+<div id="chatkit-popup">
+    <button id="chatkit-popup-close">&times;</button>
+    How can I help?
+</div>
+
+<!-- Chat Button -->
+<button id="chatkit-button" aria-label="Open chat">
+    <svg class="chat-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+        <path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H6l-2 2V4h16v12z"/>
+    </svg>
+    <svg class="close-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+        <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+    </svg>
+</button>
+
+<!-- Chat Window -->
+<div id="chatkit-window">
+    <div id="chatkit-header">
+        <div id="chatkit-header-left">
+            <div>
+                <div id="chatkit-header-title">Waterfield Tech</div>
+                <div id="chatkit-header-status">Online</div>
+            </div>
+        </div>
+        <div id="chatkit-header-actions">
+            <button id="chatkit-history" aria-label="Chat history">
+                <svg viewBox="0 0 24 24"><path d="M13 3c-4.97 0-9 4.03-9 9H1l3.89 3.89.07.14L9 12H6c0-3.87 3.13-7 7-7s7 3.13 7 7-3.13 7-7 7c-1.93 0-3.68-.79-4.94-2.06l-1.42 1.42C8.27 19.99 10.51 21 13 21c4.97 0 9-4.03 9-9s-4.03-9-9-9zm-1 5v5l4.28 2.54.72-1.21-3.5-2.08V8H12z"/></svg>
+            </button>
+        </div>
+    </div>
+    <div id="chatkit-messages">
+        <div id="chatkit-welcome">
+            <h2>How can I help you today?</h2>
+            <div id="chatkit-welcome-suggestion">
+                <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 17h-2v-2h2v2zm2.07-7.75l-.9.92C13.45 12.9 13 13.5 13 15h-2v-.5c0-1.1.45-2.1 1.17-2.83l1.24-1.26c.37-.36.59-.86.59-1.41 0-1.1-.9-2-2-2s-2 .9-2 2H8c0-2.21 1.79-4 4-4s4 1.79 4 4c0 .88-.36 1.68-.93 2.25z"/></svg>
+                What can you do?
+            </div>
+        </div>
+    </div>
+    <div id="chatkit-input-area">
+        <div id="chatkit-input-wrapper">
+            <button class="attach" aria-label="Attach file">
+                <svg viewBox="0 0 24 24"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
+            </button>
+            <input type="text" id="chatkit-input" placeholder="Ask anything..." />
+            <button id="chatkit-send" aria-label="Send message">
+                <svg viewBox="0 0 24 24"><path d="M4 12l1.41 1.41L11 7.83V20h2V7.83l5.58 5.59L20 12l-8-8-8 8z"/></svg>
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+(function() {
+    const chatButton = document.getElementById('chatkit-button');
+    const chatWindow = document.getElementById('chatkit-window');
+    const chatPopup = document.getElementById('chatkit-popup');
+    const popupClose = document.getElementById('chatkit-popup-close');
+    const chatInput = document.getElementById('chatkit-input');
+    const chatSend = document.getElementById('chatkit-send');
+    const messagesContainer = document.getElementById('chatkit-messages');
+    const welcomeSection = document.getElementById('chatkit-welcome');
+    const welcomeSuggestion = document.getElementById('chatkit-welcome-suggestion');
+
+    let isOpen = false;
+    let popupDismissed = false;
+    let popupShown = false;
+
+    // Show popup after 5 seconds
+    setTimeout(function() {
+        if (!isOpen && !popupDismissed && !popupShown) {
+            chatPopup.classList.add('show');
+            popupShown = true;
+        }
+    }, 5000);
+
+    // Close popup
+    popupClose.addEventListener('click', function(e) {
+        e.stopPropagation();
+        chatPopup.classList.remove('show');
+        popupDismissed = true;
+    });
+
+    // Click popup to open chat
+    chatPopup.addEventListener('click', function() {
+        chatPopup.classList.remove('show');
+        popupDismissed = true;
+        toggleChat();
+    });
+
+    // Toggle chat window
+    function toggleChat() {
+        isOpen = !isOpen;
+        chatButton.classList.toggle('open', isOpen);
+        chatWindow.classList.toggle('open', isOpen);
+
+        // Hide popup when chat opens
+        if (isOpen) {
+            chatPopup.classList.remove('show');
+            popupDismissed = true;
+        }
+    }
+
+    chatButton.addEventListener('click', toggleChat);
+
+    // Send message function
+    function sendMessage(text) {
+        if (!text.trim()) return;
+
+        // Hide welcome section
+        if (welcomeSection) {
+            welcomeSection.style.display = 'none';
+        }
+
+        // Add user message
+        const userMsg = document.createElement('div');
+        userMsg.className = 'chatkit-message user';
+        userMsg.textContent = text;
+        messagesContainer.appendChild(userMsg);
+
+        // Clear input
+        chatInput.value = '';
+
+        // Scroll to bottom
+        messagesContainer.scrollTop = messagesContainer.scrollHeight;
+
+        // TODO: Connect to your OpenAI agent backend here
+        // For now, show a placeholder response
+        setTimeout(function() {
+            const botMsg = document.createElement('div');
+            botMsg.className = 'chatkit-message assistant';
+            botMsg.textContent = "Thanks for your message! I'm connecting to the Waterfield Tech team...";
+            messagesContainer.appendChild(botMsg);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }, 1000);
+    }
+
+    // Send on button click
+    chatSend.addEventListener('click', function() {
+        sendMessage(chatInput.value);
+    });
+
+    // Send on Enter key
+    chatInput.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            sendMessage(chatInput.value);
+        }
+    });
+
+    // Welcome suggestion click
+    welcomeSuggestion.addEventListener('click', function() {
+        sendMessage('What can you do?');
+    });
+})();
+</script>
