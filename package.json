@@ -2,21 +2,21 @@
   "name": "wti-chatbot",
   "version": "1.0.0",
   "description": "Waterfield Tech website chatbot built with OpenAI Agents SDK",
-  "main": "dist/index.js",
-  "type": "module",
   "scripts": {
-    "build": "tsc",
-    "start": "node dist/index.js",
-    "dev": "tsx src/index.ts"
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start"
   },
   "dependencies": {
     "@openai/agents": "^0.1.0",
+    "next": "14.2.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
     "zod": "^3.23.8"
   },
   "devDependencies": {
     "@types/node": "^20.10.0",
-    "@vercel/node": "^3.0.0",
-    "tsx": "^4.7.0",
+    "@types/react": "^18.2.0",
     "typescript": "^5.3.0"
   }
 }
