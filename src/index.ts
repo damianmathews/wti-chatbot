@@ -5,7 +5,7 @@ import { z } from "zod";
 // Tool definitions
 const webSearchPreview = webSearchTool({
   filters: {
-    allowed_domains: [
+    allowedDomains: [
       "waterfieldtech.com"
     ]
   },
