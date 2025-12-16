@@ -388,6 +388,36 @@
         return html;
     }
 
+    // Typewriter effect for streaming look
+    async function typeWriter(element, text, speed = 12) {
+        const parsed = parseMarkdown(text);
+        element.innerHTML = '';
+
+        // Create a temporary div to parse the HTML
+        const temp = document.createElement('div');
+        temp.innerHTML = parsed;
+
+        // Get the text content for typing, but preserve HTML structure
+        const textContent = text;
+        let currentIndex = 0;
+
+        return new Promise((resolve) => {
+            function type() {
+                if (currentIndex < textContent.length) {
+                    // Update with parsed markdown up to current position
+                    const partialText = textContent.substring(0, currentIndex + 1);
+                    element.innerHTML = parseMarkdown(partialText);
+                    currentIndex++;
+                    messagesContainer.scrollTop = messagesContainer.scrollHeight;
+                    setTimeout(type, speed);
+                } else {
+                    resolve();
+                }
+            }
+            type();
+        });
+    }
+
     // Show popup after 5 seconds
     setTimeout(function() {
         if (!isOpen && !popupShown) {
@@ -466,13 +496,12 @@
 
             const data = await response.json();
 
-            // Add bot response
+            // Add bot response with typewriter effect
             const botMsg = document.createElement('div');
             botMsg.className = 'chatkit-message assistant';
             const responseText = data.output_text || data.response || data.message || "I'm sorry, I couldn't process that request.";
-            botMsg.innerHTML = parseMarkdown(responseText);
             messagesContainer.appendChild(botMsg);
-            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+            await typeWriter(botMsg, responseText);
 
         } catch (error) {
             console.error('Chat error:', error);
