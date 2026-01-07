@@ -1,4 +1,5 @@
 import { webSearchTool, Agent, Runner, withTrace } from "@openai/agents";
+import { z } from "zod";
 
 
 // Tool definitions
@@ -180,27 +181,36 @@ const fallbackAgent = new Agent({
   }
 });
 
-// Router agent with handoffs - defined after all specialized agents
+// Router agent - returns which agent to use
 const classify = new Agent({
   name: "Classify",
-  instructions: `You are a router. Read the user message and immediately hand off to the best agent:
-
-- SERVICES: General "what do you do?", company overview, solution category questions
-- CX MOD: CX modernization, consulting, cloud migration, workforce optimization, contact center transformation
-- IT: Innovative IT, Xcelerate, managed services, IT operations
-- APPLIED AI: AI products (faqGPT, routeGPT, taskGPT, voiceGPT), AI strategy workshop
-- CONTENT: Articles, insights, blog posts, newsletters, content recommendations
-- SUPPORT: Support portal, help requests, technical issues, contacting support
-- SALES: Pricing, demos, buying, proposals, sales inquiries
-
-Do not respond to the user. Immediately hand off to the appropriate agent.`,
+  instructions: `Classify the user message and return the best agent:
+- services: General "what do you do?", company overview, solution category questions
+- cx_mod: CX modernization, consulting, cloud migration, workforce optimization, contact center
+- it: Innovative IT, Xcelerate, managed services
+- applied_ai: AI products (faqGPT, routeGPT, taskGPT, voiceGPT), AI strategy workshop
+- content: Articles, insights, blog posts, newsletters
+- support: Support portal, help requests, technical issues
+- sales: Pricing, demos, buying, proposals`,
   model: "gpt-5-mini",
-  handoffs: [services, cxMod, innovativeIt, appliedAi, content, support, sales]
+  outputType: z.object({
+    agent: z.enum(["services", "cx_mod", "it", "applied_ai", "content", "support", "sales"])
+  })
 });
+
+const agentMap: Record<string, Agent> = {
+  services,
+  cx_mod: cxMod,
+  it: innovativeIt,
+  applied_ai: appliedAi,
+  content,
+  support,
+  sales
+};
 
 type WorkflowInput = { input_as_text: string };
 
-// Main code entrypoint - single runner.run() with handoffs
+// Main code entrypoint - two calls: classify then respond
 export const runWorkflow = async (workflow: WorkflowInput) => {
   return await withTrace("WEBSITE CHATBOT v3.0", async () => {
     const runner = new Runner({
@@ -210,11 +220,15 @@ export const runWorkflow = async (workflow: WorkflowInput) => {
       }
     });
 
-    const result = await runner.run(
-      classify,
-      [{ role: "user", content: [{ type: "input_text", text: workflow.input_as_text }] }]
-    );
+    const userMessage = [{ role: "user" as const, content: [{ type: "input_text" as const, text: workflow.input_as_text }] }];
 
+    // Step 1: Classify
+    const classifyResult = await runner.run(classify, userMessage);
+    const classification = classifyResult.finalOutput as { agent: string };
+    const selectedAgent = agentMap[classification.agent] ?? fallbackAgent;
+
+    // Step 2: Run selected agent
+    const result = await runner.run(selectedAgent, userMessage);
     return result.finalOutput ?? "";
   });
 }
