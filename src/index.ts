@@ -47,7 +47,7 @@ Return a single line of JSON, and nothing else:
 \`\`\`json
 {"category":"<one of the categories exactly as listed>"}
 \`\`\``,
-  model: "gpt-4o",
+  model: "gpt-5-mini",
   outputType: ClassifySchema,
   modelSettings: {
     temperature: 0
@@ -79,7 +79,7 @@ INSIGHTS (BLOG) https://waterfieldtech.com/insights/ https://waterfieldtech.com/
 XCELERATE PLATFORM https://waterfieldtech.com/solutions/xcelerate/ https://waterfieldtech.com/solutions/xcelerate/changelog/
 
 Never create plans or ask for more info. The user will as YOU for info, your job is to answer, not lead them to a conclusion or to a specific solution, Never hallucinate any details regarding implementation, capabilities, or anything else!`,
-  model: "gpt-4o",
+  model: "gpt-5-mini",
   tools: [
     webSearchPreview
   ],
@@ -105,7 +105,7 @@ INSIGHTS (BLOG) https://waterfieldtech.com/insights/ https://waterfieldtech.com/
 XCELERATE PLATFORM https://waterfieldtech.com/solutions/xcelerate/ https://waterfieldtech.com/solutions/xcelerate/changelog/
 
 Never create plans or ask for more info. The user will as YOU for info, your job is to answer, not lead them to a conclusion or to a specific solution, Never hallucinate any details regarding implementation, capabilities, or anything else!`,
-  model: "gpt-4o",
+  model: "gpt-5-mini",
   modelSettings: {
     store: true
   }
@@ -135,7 +135,7 @@ INSIGHTS (BLOG) https://waterfieldtech.com/insights/ https://waterfieldtech.com/
 XCELERATE PLATFORM https://waterfieldtech.com/solutions/xcelerate/ https://waterfieldtech.com/solutions/xcelerate/changelog/
 
 Never create plans or ask for more info. The user will as YOU for info, your job is to answer, not lead them to a conclusion or to a specific solution, Never hallucinate any details regarding implementation, capabilities, or anything else!`,
-  model: "gpt-4o",
+  model: "gpt-5-mini",
   modelSettings: {
     store: true
   }
@@ -165,7 +165,7 @@ INSIGHTS (BLOG) https://waterfieldtech.com/insights/ https://waterfieldtech.com/
 XCELERATE PLATFORM https://waterfieldtech.com/solutions/xcelerate/ https://waterfieldtech.com/solutions/xcelerate/changelog/
 
 Never create plans or ask for more info. The user will as YOU for info, your job is to answer, not lead them to a conclusion or to a specific solution, Never hallucinate any details regarding implementation, capabilities, or anything else!`,
-  model: "gpt-4o",
+  model: "gpt-5-mini",
   modelSettings: {
     store: true
   }
@@ -190,7 +190,7 @@ When visitors seek thought leadership, industry insights, research articles, whi
 DO NOT MAKE UP LINKS. WHEN YOU SEND THE USER A LINK, IT MUST BE TRIPLE CHECKED, a legitimate link from the Waterfield Tech website. don't ever hallucinate webpages that dont exist.
 
 Never create plans or ask for more info. The user will as YOU for info, your job is to answer, not lead them to a conclusion or to a specific solution, Never hallucinate any details regarding implementation, capabilities, or anything else!`,
-  model: "gpt-4o",
+  model: "gpt-5-mini",
   modelSettings: {
     store: true
   }
@@ -217,7 +217,7 @@ INSIGHTS (BLOG) https://waterfieldtech.com/insights/ https://waterfieldtech.com/
 XCELERATE PLATFORM https://waterfieldtech.com/solutions/xcelerate/ https://waterfieldtech.com/solutions/xcelerate/changelog/
 
 Never create plans or ask for more info. The user will as YOU for info, your job is to answer, not lead them to a conclusion or to a specific solution, Never hallucinate any details regarding implementation, capabilities, or anything else!`,
-  model: "gpt-4o",
+  model: "gpt-5-mini",
   modelSettings: {
     store: true
   }
@@ -251,7 +251,7 @@ INSIGHTS (BLOG) https://waterfieldtech.com/insights/ https://waterfieldtech.com/
 XCELERATE PLATFORM https://waterfieldtech.com/solutions/xcelerate/ https://waterfieldtech.com/solutions/xcelerate/changelog/
 
 Never create plans or ask for more info. The user will as YOU for info, your job is to answer, not lead them to a conclusion or to a specific solution, Never hallucinate any details regarding implementation, capabilities, or anything else!`,
-  model: "gpt-4o",
+  model: "gpt-5-mini",
   modelSettings: {
     store: true
   }
@@ -260,7 +260,7 @@ Never create plans or ask for more info. The user will as YOU for info, your job
 const fallbackAgent = new Agent({
   name: "Fallback",
   instructions: "You are a helpful assistant for Waterfield Tech. If you cannot help with the user's request, direct them to the contact page at https://waterfieldtech.com/contact/",
-  model: "gpt-4o",
+  model: "gpt-5-mini",
   modelSettings: {
     store: true
   }
