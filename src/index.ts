@@ -1,5 +1,4 @@
-import { webSearchTool, Agent, Runner, withTrace } from "@openai/agents";
-import { z } from "zod";
+import { webSearchTool, Agent, Runner, withTrace, handoff } from "@openai/agents";
 
 
 // Tool definitions
@@ -16,8 +15,8 @@ const webSearchPreview = webSearchTool({
 })
 
 const services = new Agent({
-  name: "SERVICES",
-  instructions: `HARD LIMIT: MAX 2 SENTENCES + 1 LINK. Never exceed 40 words before the link.
+  name: "services",
+  instructions: `HARD LIMIT: MAX 2 SENTENCES + 1 LINK. Never exceed 40 words before the link. Be friendly and conversational, not jargony.
 
 You answer general questions about Waterfield Tech's three solution areas: Applied AI, CX Modernization, and Innovative IT.
 
@@ -39,8 +38,8 @@ https://waterfieldtech.com/solutions/ | https://waterfieldtech.com/solutions/app
 });
 
 const cxMod = new Agent({
-  name: "CX MOD",
-  instructions: `HARD LIMIT: MAX 2 SENTENCES + 1 LINK. Never exceed 40 words before the link.
+  name: "cx_mod",
+  instructions: `HARD LIMIT: MAX 2 SENTENCES + 1 LINK. Never exceed 40 words before the link. Be friendly and conversational, not jargony.
 
 You answer CX Modernization questions for Waterfield Tech (consulting, cloud migration, workforce optimization, contact center transformation).
 
@@ -59,8 +58,8 @@ https://waterfieldtech.com/solutions/consulting-services/ | https://waterfieldte
 });
 
 const innovativeIt = new Agent({
-  name: "IT",
-  instructions: `HARD LIMIT: MAX 2 SENTENCES + 1 LINK. Never exceed 40 words before the link.
+  name: "it",
+  instructions: `HARD LIMIT: MAX 2 SENTENCES + 1 LINK. Never exceed 40 words before the link. Be friendly and conversational, not jargony.
 
 You answer Innovative IT questions for Waterfield Tech (Xcelerate, managed services, IT operations).
 
@@ -80,8 +79,8 @@ https://waterfieldtech.com/ | https://waterfieldtech.com/contact/ | https://wate
 });
 
 const appliedAi = new Agent({
-  name: "APPLIED AI",
-  instructions: `HARD LIMIT: MAX 2 SENTENCES + 1 LINK. Never exceed 40 words before the link.
+  name: "applied_ai",
+  instructions: `HARD LIMIT: MAX 2 SENTENCES + 1 LINK. Never exceed 40 words before the link. Be friendly and conversational, not jargony.
 
 You answer Applied AI questions for Waterfield Tech (faqGPT, routeGPT, taskGPT, voiceGPT, AI Strategy Workshop).
 
@@ -107,8 +106,8 @@ https://waterfieldtech.com/solutions/applied-ai/ | https://waterfieldtech.com/so
 });
 
 const content = new Agent({
-  name: "CONTENT",
-  instructions: `HARD LIMIT: MAX 2 SENTENCES + 1 LINK. Never exceed 40 words before the link.
+  name: "content",
+  instructions: `HARD LIMIT: MAX 2 SENTENCES + 1 LINK. Never exceed 40 words before the link. Be friendly and conversational, not jargony.
 
 You help find Waterfield Tech articles and content. For content lists, max 3 links.
 
@@ -127,8 +126,8 @@ https://waterfieldtech.com/insights/ | https://waterfieldtech.com/the-last-mile/
 });
 
 const support = new Agent({
-  name: "SUPPORT",
-  instructions: `HARD LIMIT: MAX 2 SENTENCES + 1 LINK. Never exceed 40 words before the link.
+  name: "support",
+  instructions: `HARD LIMIT: MAX 2 SENTENCES + 1 LINK. Never exceed 40 words before the link. Be friendly and conversational, not jargony.
 
 You direct visitors to Waterfield Tech support/contact paths. Support email: support@waterfieldtech.com
 
@@ -148,8 +147,8 @@ https://waterfieldtech.com/support/ | https://waterfieldtech.com/contact/`,
 });
 
 const sales = new Agent({
-  name: "SALES",
-  instructions: `HARD LIMIT: MAX 2 SENTENCES + 1 LINK. Never exceed 40 words before the link.
+  name: "sales",
+  instructions: `HARD LIMIT: MAX 2 SENTENCES + 1 LINK. Never exceed 40 words before the link. Be friendly and conversational, not jargony.
 
 You handle sales inquiries for Waterfield Tech (pricing, demos, proposals). No hallucinations or hype.
 
@@ -181,36 +180,34 @@ const fallbackAgent = new Agent({
   }
 });
 
-// Router agent - returns which agent to use
-const classify = new Agent({
-  name: "Classify",
-  instructions: `Classify the user message and return the best agent:
-- services: General "what do you do?", company overview, solution category questions
-- cx_mod: CX modernization, consulting, cloud migration, workforce optimization, contact center
-- it: Innovative IT, Xcelerate, managed services
-- applied_ai: AI products (faqGPT, routeGPT, taskGPT, voiceGPT), AI strategy workshop
-- content: Articles, insights, blog posts, newsletters
-- support: Support portal, help requests, technical issues
-- sales: Pricing, demos, buying, proposals`,
-  model: "gpt-5-mini",
-  outputType: z.object({
-    agent: z.enum(["services", "cx_mod", "it", "applied_ai", "content", "support", "sales"])
-  })
-});
+// Router agent with handoffs
+const router = new Agent({
+  name: "router",
+  instructions: `You are a router for Waterfield Tech. Read the user's message and immediately transfer to the best specialist using the transfer tools. Do NOT respond directly - always use a transfer tool.
 
-const agentMap: Record<string, Agent> = {
-  services,
-  cx_mod: cxMod,
-  it: innovativeIt,
-  applied_ai: appliedAi,
-  content,
-  support,
-  sales
-};
+Use these transfer tools:
+- transfer_to_services: General company questions, "what do you do?", solution overviews
+- transfer_to_cx_mod: CX modernization, consulting, cloud migration, workforce optimization, contact center
+- transfer_to_it: Innovative IT, Xcelerate, managed services, IT operations
+- transfer_to_applied_ai: AI products (faqGPT, routeGPT, taskGPT, voiceGPT), AI strategy workshop
+- transfer_to_content: Articles, insights, blog posts, newsletters
+- transfer_to_support: Support portal, help requests, technical issues
+- transfer_to_sales: Pricing, demos, buying, proposals, quotes`,
+  model: "gpt-5-mini",
+  handoffs: [
+    handoff(services, { toolDescriptionOverride: "Transfer to services agent for general company and solution questions" }),
+    handoff(cxMod, { toolDescriptionOverride: "Transfer to CX Modernization agent for consulting, cloud migration, contact center questions" }),
+    handoff(innovativeIt, { toolDescriptionOverride: "Transfer to IT agent for Xcelerate and managed services questions" }),
+    handoff(appliedAi, { toolDescriptionOverride: "Transfer to Applied AI agent for faqGPT, routeGPT, taskGPT, voiceGPT questions" }),
+    handoff(content, { toolDescriptionOverride: "Transfer to content agent for articles and insights" }),
+    handoff(support, { toolDescriptionOverride: "Transfer to support agent for help and technical issues" }),
+    handoff(sales, { toolDescriptionOverride: "Transfer to sales agent for pricing, demos, and proposals" })
+  ]
+});
 
 type WorkflowInput = { input_as_text: string };
 
-// Main code entrypoint - two calls: classify then respond
+// Main code entrypoint - single call with handoffs
 export const runWorkflow = async (workflow: WorkflowInput) => {
   return await withTrace("WEBSITE CHATBOT v3.0", async () => {
     const runner = new Runner({
@@ -220,15 +217,11 @@ export const runWorkflow = async (workflow: WorkflowInput) => {
       }
     });
 
-    const userMessage = [{ role: "user" as const, content: [{ type: "input_text" as const, text: workflow.input_as_text }] }];
+    const result = await runner.run(
+      router,
+      [{ role: "user", content: [{ type: "input_text", text: workflow.input_as_text }] }]
+    );
 
-    // Step 1: Classify
-    const classifyResult = await runner.run(classify, userMessage);
-    const classification = classifyResult.finalOutput as { agent: string };
-    const selectedAgent = agentMap[classification.agent] ?? fallbackAgent;
-
-    // Step 2: Run selected agent
-    const result = await runner.run(selectedAgent, userMessage);
     return result.finalOutput ?? "";
   });
 }
