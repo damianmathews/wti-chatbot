@@ -50,7 +50,7 @@ Return a single line of JSON, and nothing else:
   model: "gpt-5-mini",
   outputType: ClassifySchema,
   modelSettings: {
-    temperature: 0
+    // temperature not supported by gpt-5-mini
   }
 });
 
