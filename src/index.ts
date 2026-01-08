@@ -1,4 +1,5 @@
-import { webSearchTool, Agent, Runner, withTrace, handoff } from "@openai/agents";
+import { webSearchTool, Agent, Runner, withTrace } from "@openai/agents";
+import { z } from "zod";
 
 
 // Tool definitions
@@ -180,34 +181,36 @@ const fallbackAgent = new Agent({
   }
 });
 
-// Router agent with handoffs
-const router = new Agent({
-  name: "router",
-  instructions: `You are a router for Waterfield Tech. Read the user's message and immediately transfer to the best specialist using the transfer tools. Do NOT respond directly - always use a transfer tool.
-
-Use these transfer tools:
-- transfer_to_services: General company questions, "what do you do?", solution overviews
-- transfer_to_cx_mod: CX modernization, consulting, cloud migration, workforce optimization, contact center
-- transfer_to_it: Innovative IT, Xcelerate, managed services, IT operations
-- transfer_to_applied_ai: AI products (faqGPT, routeGPT, taskGPT, voiceGPT), AI strategy workshop
-- transfer_to_content: Articles, insights, blog posts, newsletters
-- transfer_to_support: Support portal, help requests, technical issues
-- transfer_to_sales: Pricing, demos, buying, proposals, quotes`,
+// Router agent - returns which agent to use
+const classify = new Agent({
+  name: "classify",
+  instructions: `Classify the user message and return the best agent:
+- services: General "what do you do?", company overview, off-topic, greetings
+- cx_mod: CX modernization, consulting, cloud migration, workforce optimization, contact center
+- it: Innovative IT, Xcelerate, managed services
+- applied_ai: AI products (faqGPT, routeGPT, taskGPT, voiceGPT), AI strategy workshop
+- content: Articles, insights, blog posts, newsletters
+- support: Support portal, help requests, technical issues
+- sales: Pricing, demos, buying, proposals`,
   model: "gpt-5-mini",
-  handoffs: [
-    handoff(services, { toolDescriptionOverride: "Transfer to services agent for general company and solution questions" }),
-    handoff(cxMod, { toolDescriptionOverride: "Transfer to CX Modernization agent for consulting, cloud migration, contact center questions" }),
-    handoff(innovativeIt, { toolDescriptionOverride: "Transfer to IT agent for Xcelerate and managed services questions" }),
-    handoff(appliedAi, { toolDescriptionOverride: "Transfer to Applied AI agent for faqGPT, routeGPT, taskGPT, voiceGPT questions" }),
-    handoff(content, { toolDescriptionOverride: "Transfer to content agent for articles and insights" }),
-    handoff(support, { toolDescriptionOverride: "Transfer to support agent for help and technical issues" }),
-    handoff(sales, { toolDescriptionOverride: "Transfer to sales agent for pricing, demos, and proposals" })
-  ]
+  outputType: z.object({
+    agent: z.enum(["services", "cx_mod", "it", "applied_ai", "content", "support", "sales"])
+  })
 });
+
+const agentMap: Record<string, Agent> = {
+  services,
+  cx_mod: cxMod,
+  it: innovativeIt,
+  applied_ai: appliedAi,
+  content,
+  support,
+  sales
+};
 
 type WorkflowInput = { input_as_text: string };
 
-// Main code entrypoint - single call with handoffs
+// Main code entrypoint - two calls: classify then respond
 export const runWorkflow = async (workflow: WorkflowInput) => {
   return await withTrace("WEBSITE CHATBOT v3.0", async () => {
     const runner = new Runner({
@@ -217,11 +220,15 @@ export const runWorkflow = async (workflow: WorkflowInput) => {
       }
     });
 
-    const result = await runner.run(
-      router,
-      [{ role: "user", content: [{ type: "input_text", text: workflow.input_as_text }] }]
-    );
+    const userMessage = [{ role: "user" as const, content: [{ type: "input_text" as const, text: workflow.input_as_text }] }];
 
+    // Step 1: Classify
+    const classifyResult = await runner.run(classify, userMessage);
+    const classification = classifyResult.finalOutput as { agent: string };
+    const selectedAgent = agentMap[classification.agent] ?? fallbackAgent;
+
+    // Step 2: Run selected agent
+    const result = await runner.run(selectedAgent, userMessage);
     return result.finalOutput ?? "";
   });
 }
